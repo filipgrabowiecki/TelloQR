@@ -7,8 +7,6 @@ import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
 
-global czy_hubert_to_debil
-czy_hubert_to_debil = True
 class TelloDrone():
     drone = Tello()
     start = time.time()
@@ -53,6 +51,7 @@ class TelloDrone():
         while not self.has_landed:
             if self.is_flying:
                 input()
+                self.rc_control(0, 0, 0, 0)
                 self.drone.emergency()
 
     def battery_temp_check(self):
@@ -160,6 +159,7 @@ class TelloDrone():
         self.drone.streamoff()
 
     def follow_qr(self):
+
         while not self.has_landed:
             #print(self.barcode_rect)
             if self.is_flying:
@@ -243,8 +243,6 @@ class TelloDrone():
 
     def mission_func(self):
         self.takeoff_func()
-        # self.is_flying = True
-        # self.has_landed = False
         print(f"IS FLYING: {self.is_flying} ")
         print(f"HAS LANDED: {self.has_landed} ")
         time.sleep(5)
@@ -257,23 +255,22 @@ class TelloDrone():
 
 
             else:
-                if self.roll_left == True:
-                    self.rc_control(10, 0, 0, 0)
-                    print("Turlaj sie w lewo")
-                elif self.roll_right == True:
-                    self.rc_control(-10, 0, 0, 0)
-                    print("Turlaj sie w prawo")
-                elif self.roll_ok == True:
-                    print("Turlaj dropsa")
-
-                    if self.drone_left == True:
-                        self.rc_control(0,0,0,-10)
-                        print("left")
-                    elif self.drone_right == True:
-                        print("right")
-                        self.rc_control(0,0,0,10)
-                    elif self.drone_rotate_stop == True:
-                        print("straight")
+                if self.drone_left == True:
+                    self.rc_control(0, 0, 0, -10)
+                    print("left")
+                elif self.drone_right == True:
+                    print("right")
+                    self.rc_control(0, 0, 0, 10)
+                elif self.drone_rotate_stop == True:
+                    print("straight")
+                    if self.roll_left == True:
+                        self.rc_control(-10, 0, 0, 0)
+                        print("Turlaj sie w lewo")
+                    elif self.roll_right == True:
+                        self.rc_control(10, 0, 0, 0)
+                        print("Turlaj sie w prawo")
+                    elif self.roll_ok == True:
+                        print("Turlaj dropsa")
                         if self.drone_up == True:
                             print("up")
                             self.rc_control(0,0,15,0)
@@ -290,9 +287,6 @@ class TelloDrone():
                             else:
                                 self.rc_control(0,20,0,0)
 
-
-
-
             time.sleep(0.2)
             cnt += 1
             #print(cnt)
@@ -300,8 +294,6 @@ class TelloDrone():
         self.rc_control(0,0,0,0)
         time.sleep(5)
         self.landing_func()
-        # self.is_flying = False
-        # self.has_landed = True
         print(f"IS FLYING: {self.is_flying} ")
         print(f"HAS LANDED: {self.has_landed} ")
         self.drone.end()
@@ -314,7 +306,7 @@ def main():
     threading.Thread(target=drone.show_camera).start()
     # threading.Thread(target=drone.flight_data).start()
     threading.Thread(target=drone.follow_qr).start()
-    #threading.Thread (target=drone.mission_func).start()
+    threading.Thread (target=drone.mission_func).start()
     print("\nBateria po misji: \n")
     drone.battery_temp_check()
 
