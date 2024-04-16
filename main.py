@@ -7,6 +7,9 @@ import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
 
+global czy_hubert_to_debil
+czy_hubert_to_debil = True
+
 class TelloDrone():
     drone = Tello()
     start = time.time()
@@ -59,7 +62,6 @@ class TelloDrone():
         print(f"TEMPERATURE: {self.drone.get_temperature()}\n")
 
     def graphs(self):
-
         x = []
         pitch = []
         yaw = []
@@ -73,7 +75,6 @@ class TelloDrone():
         is_alive = True
 
         while not self.has_landed:
-
             x.append(cnt)
             pitch.append(self.drone.get_pitch())
             yaw.append(self.drone.get_yaw())
