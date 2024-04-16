@@ -22,12 +22,13 @@ class TelloDrone():
     global drone_up
     global drone_down
     global drone_rotate_stop
-
+    global barcode_data
     global roll_right
     global roll_left
     global roll_ok
     global barcode_polygon
-
+    global right_90
+    global left_90
     global height_14
     global height_23
 
@@ -42,10 +43,11 @@ class TelloDrone():
         self.drone_up = False
         self.drone_down = False
         self.drone_rotate_stop = False
-
+        self.barcode_data = ''
         self.height_14 = 0
         self.height_23 = 0
-
+        self.right_90 = False
+        self.left_90 = False
         self.roll_left = False
         self.roll_right = False
         self.roll_ok = False
@@ -142,8 +144,7 @@ class TelloDrone():
             for barcode in decode(cap):
                 self.barcode_rect = barcode.rect
                 self.barcode_polygon = barcode.polygon
-
-
+                self.barcode_data = barcode.data.decode('utf-8')
                 self.height_14 = (barcode.polygon[0][1] - barcode.polygon[3][1])
                 self.height_23 = (barcode.polygon[1][1] - barcode.polygon[2][1])
 
@@ -164,6 +165,12 @@ class TelloDrone():
         while not self.has_landed:
             #print(self.barcode_rect)
             if self.is_flying:
+                if self.barcode_data == 'right':
+                    self.right_90 = True
+                    self.left_90 = False
+                elif self.barcode_data == 'left':
+                    self.left_90 = True
+                    self.right_90 = False
                 # print("działa w chuj")
                 left = self.barcode_rect[0]
                 top = self.barcode_rect[1]
@@ -248,7 +255,7 @@ class TelloDrone():
         print(f"HAS LANDED: {self.has_landed} ")
         time.sleep(5)
         cnt = 0
-        while cnt < 250:
+        while cnt < 450:
             #print(self.roll_left, self.roll_right, self.roll_ok)
             if self.barcode_rect == [0, 0, 0, 0]:
                 self.rc_control(0,0,0,20)
@@ -265,10 +272,10 @@ class TelloDrone():
                 elif self.drone_rotate_stop == True:
                     print("straight")
                     if self.roll_left == True:
-                        self.rc_control(-10, 0, 0, 0)
+                        self.rc_control(-15, 0, 0, 0)
                         print("Turlaj sie w lewo")
                     elif self.roll_right == True:
-                        self.rc_control(10, 0, 0, 0)
+                        self.rc_control(15, 0, 0, 0)
                         print("Turlaj sie w prawo")
                     elif self.roll_ok == True:
                         print("Turlaj dropsa")
@@ -285,6 +292,15 @@ class TelloDrone():
                             if width > 250 or height > 210:
                                 self.rc_control(0, 0, 0, 0)
                                 print("Jesteśmy totalnie zajebiści ale chóbert nie")
+                                print(self.barcode_data)
+                                if self.left_90 == True:
+                                    self.drone.rotate_counter_clockwise(90)
+                                    print("90 left")
+                                    self.left_90 = False
+                                elif self.right_90 == True:
+                                    self.drone.rotate_clockwise(90)
+                                    print("90 right")
+                                    self.right_90 = False
                             else:
                                 self.rc_control(0,20,0,0)
 
