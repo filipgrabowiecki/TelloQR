@@ -51,6 +51,110 @@ class TelloDrone:
         print(f"\nBATTERY: {self.drone.get_battery()}")
         print(f"TEMPERATURE: {self.drone.get_temperature()}\n")
 
+    def attitude_indicator(self):
+        image = np.zeros((400, 750, 3), dtype=np.uint8)
+        pitch = self.drone.get_pitch()
+        y1 = int(round((-5.6 * pitch + 200), 0))
+        roll = self.drone.get_roll()
+        y2 = int(round((8.6 * roll + 375), 0))
+        angle = self.drone.get_roll()
+        yaw = self.drone.get_yaw()
+        speed = round((((self.drone.get_speed_x()) ** (2)) + ((self.drone.get_speed_y()) ** (2))) ** (1 / 2), 0)
+        alt = self.drone.get_height()
+        vs = self.drone.get_speed_z()
+        bat = self.drone.get_battery()
+
+        # yaw = 20
+        # speed = 35
+        # alt = 3.4
+        # vs = 20
+        # bat = 15
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.6
+        thickness = 2
+
+        yaw_text_pos = (10, 30)
+        yaw_text = f'YAW: {yaw}'
+
+        speed_text_pos = (10, 197)
+        speed_text = f'SPEED: {speed}'
+
+        alt_text_pos = (660, 197)
+        alt_text = f'ALT: {alt}'
+
+        vs_text_pos = (660, 167)
+        vs_text = f'VS: {vs}'
+
+        bat_text_pos = (620, 30)
+        bat_text = f'BATTERY: {bat}'
+
+        brown = (5, 129, 223)
+        blue = (255, 229, 50)
+        yellow = (0, 255, 255)
+        white = (255, 255, 255)
+        purple = (255, 0, 255)
+        red = (0, 0, 255)
+
+        # SKY/GROUND
+        cv2.rectangle(image, (0, 0), (750, 200), blue, -1)
+        cv2.rectangle(image, (0, 200), (750, 400), brown, -1)
+
+        # PITCH/UP
+        cv2.rectangle(image, (275, 171), (475, 173), white, -1)
+        cv2.rectangle(image, (225, 143), (525, 145), white, -1)
+        cv2.rectangle(image, (275, 115), (475, 117), white, -1)
+        cv2.rectangle(image, (225, 87), (525, 89), white, -1)
+        cv2.rectangle(image, (275, 59), (475, 61), white, -1)
+
+        # PITCH/DOWN
+        cv2.rectangle(image, (275, 227), (475, 229), white, -1)
+        cv2.rectangle(image, (225, 255), (525, 257), white, -1)
+        cv2.rectangle(image, (275, 283), (475, 285), white, -1)
+        cv2.rectangle(image, (225, 311), (525, 313), white, -1)
+        cv2.rectangle(image, (275, 339), (475, 341), white, -1)
+
+        # ROLL/MID
+        cv2.rectangle(image, (374, 190), (376, 210), white, -1)
+
+        # ROLL/LEFT
+        cv2.rectangle(image, (331, 190), (333, 210), white, -1)
+        cv2.rectangle(image, (288, 190), (290, 210), white, -1)
+        cv2.rectangle(image, (245, 190), (247, 210), white, -1)
+        cv2.rectangle(image, (202, 190), (204, 210), white, -1)
+        cv2.rectangle(image, (159, 190), (161, 210), white, -1)
+
+        # ROLL/RIGHT
+        cv2.rectangle(image, (417, 190), (419, 210), white, -1)
+        cv2.rectangle(image, (460, 190), (462, 210), white, -1)
+        cv2.rectangle(image, (503, 190), (505, 210), white, -1)
+        cv2.rectangle(image, (546, 190), (548, 210), white, -1)
+        cv2.rectangle(image, (589, 190), (591, 210), white, -1)
+
+        cv2.rectangle(image, (300, y1 - 5), (450, y1 + 5), yellow, -1)
+        cv2.rectangle(image, (y2 - 5, 125), (y2 + 5, 275), yellow, -1)
+
+        # TEXT/YAW
+        cv2.putText(image, yaw_text, yaw_text_pos, font, font_scale, purple, thickness)
+
+        # SPEED/TEXT
+        cv2.putText(image, speed_text, speed_text_pos, font, font_scale, purple, thickness)
+
+        # ALT/TEXT
+        cv2.putText(image, alt_text, alt_text_pos, font, font_scale, purple, thickness)
+
+        # VS/TEXT
+        cv2.putText(image, vs_text, vs_text_pos, font, font_scale, purple, thickness)
+
+        # BAT/TEXT
+        if bat > 20:
+            cv2.putText(image, bat_text, bat_text_pos, font, font_scale, purple, thickness)
+        else:
+            cv2.putText(image, bat_text, bat_text_pos, font, font_scale, red, thickness)
+
+        cv2.imshow('attitude indicator', image)
+        cv2.waitKey(1)
+
     def show_camera(self):
         cap = self.drone.get_frame_read().frame
         cap = cv2.resize(cap, (1280, 720))
@@ -186,17 +290,18 @@ class TelloDrone:
                             width = self.barcode_rect[2]
                             height = self.barcode_rect[3]
                             if width > 250 or height > 210:
-                                self.rc_control(0, 0, 0, 0)
-                                print("Jesteśmy totalnie zajebiści ale chóbert nie")
-                                print(self.barcode_data)
-                                if self.left_90 == True:
-                                    self.drone.rotate_counter_clockwise(90)
-                                    print("90 left")
-                                    self.left_90 = False
-                                elif self.right_90 == True:
-                                    self.drone.rotate_clockwise(90)
-                                    print("90 right")
-                                    self.right_90 = False
+                                self.drone.land()
+                                # self.rc_control(0, 0, 0, 0)
+                                # print("Jesteśmy totalnie zajebiści ale chóbert nie")
+                                # print(self.barcode_data)
+                                # if self.left_90 == True:
+                                #     self.drone.rotate_counter_clockwise(90)
+                                #     print("90 left")
+                                #     self.left_90 = False
+                                # elif self.right_90 == True:
+                                #     self.drone.rotate_clockwise(90)
+                                #     print("90 right")
+                                #     self.right_90 = False
                             else:
                                 self.rc_control(0, 20, 0, 0)
 
@@ -207,7 +312,6 @@ class TelloDrone:
         self.rc_control(0, 0, 0, 0)
         time.sleep(5)
         self.drone.land()
-
     def main(self):
 
         #KILLSWITCH
@@ -224,6 +328,10 @@ class TelloDrone:
         camera_show = self.Threading(0.001, self.stop_controller, self.show_camera)
         camera_show.start()
 
+        #ATTITUDE INDICATOR
+        attitude_indicator = self.Threading(0.001, self.stop_controller, self.attitude_indicator)
+        attitude_indicator.start()
+
         #BATTERY
         battery_check = self.Threading(25, self.stop_controller, self.battery_temp_check)
         battery_check.start()
@@ -232,6 +340,8 @@ class TelloDrone:
         follow_qr = self.Threading(0.3, self.stop_controller, self.follow_qr)
         follow_qr.start()
 
+        attitude_indicator = self.Threading(0.001, self.stop_controller, self.attitude_indicator)
+        attitude_indicator.start()
 
 
 
@@ -257,10 +367,11 @@ class TelloDrone:
         self.roll_ok = False
 
         self.main()
+
         self.mission_func()
 
         self.drone.streamoff()
         self.drone.end()
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     td = TelloDrone()
