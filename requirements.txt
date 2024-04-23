@@ -1,5 +1,7 @@
 matplotlib~=3.8.4
 opencv-python~=4.9.0.80
 numpy~=1.26.4
-djitellopy~=2.5.0
+djitellopy~=2.3.1
 pyzbar~=0.1.9
+keyboard~=0.13.5
+ultralytics~=8.2.2
